@@ -86,6 +86,13 @@ exports.profile = function(req, res, next){
 exports.google = async function(req, res, next){
 }
 
+exports.logout = function(req, res, next){
+  console.log("User logged out")
+  res.status(200).json({
+    message: 'User logged out'
+  })
+}
+
 exports.users = function(req, res, next){
   User.find().then(documents => {
     res.status(200).json({

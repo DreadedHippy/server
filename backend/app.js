@@ -67,6 +67,7 @@ app.get('/api/users/list', checkAuth, login.users);
 let log = false
 let loggedUser = {};
 app.post('/api/users/login', login.login)
+app.get('/api/users/logout', login.logout);
 
 
 // Login Confirmation
