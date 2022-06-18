@@ -8,7 +8,8 @@ const userSchema = mongoose.Schema({
   friends: { type: Array},
   verifyToken: {type: String},
   password_token: {type: String},
-  isVerified: {type: Boolean, default: false}
+  isVerified: {type: Boolean, default: false},
+  wallets: {type: Array, default: [] }
 });
 
 userSchema.plugin(uniqueValidator);

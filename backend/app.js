@@ -13,7 +13,8 @@ const user = require('./models/user');
 const dotenv = require('dotenv').config();
 const signup = require('./routes/signup')
 const login = require('./routes/login')
-const passwordreset = require('./routes/passwordreset')
+const passwordreset = require('./routes/passwordreset');
+const wallet = require('./routes/wallet');
 // const multer = require('multer')
 // const io = require('socket.io')(http);
 // const { buildSchema } = require('graphql');
@@ -90,6 +91,9 @@ app.post('/api/users/usermod', (req, res, next) => {
       });
     })
 })
+
+// CREATE WALLET
+app.post('/api/wallets/create', wallet.create)
 
 module.exports = app
 
