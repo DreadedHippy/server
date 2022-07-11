@@ -23,14 +23,15 @@ exports.create = function(req, res, next) {
     console.log(result)
     if(result.modifiedCount == 0){
       return res.status(400).json({
-        message: 'Wallet Aaready added',
+        message: 'Wallet Already added',
         result: result
       })
     }
     if(result.modifiedCount !== 0){
       return res.status(200).json({
         message: 'Wallet Saved',
-        wallet: result
+        result: result,
+        wallet: wallet
       })
     }
   }).catch(err =>{
@@ -40,4 +41,21 @@ exports.create = function(req, res, next) {
     })  
   })
 
+}
+
+exports.wallets = function(req, res, next){
+  const email = req.query.email
+  User.findOne({email: email})
+  .then(user => {
+    return res.status(200).json({
+      message: 'Wallets fetched!',
+      wallets: user.wallets      
+    })
+  }).catch( err => {
+    console.log(err);
+    return res.status(400).json({
+      message: 'Error!',
+      error: err
+    })
+  })
 }

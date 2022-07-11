@@ -42,7 +42,7 @@ mongoose
     console.log("Connected to database!");
   })
   .catch((err) => {
-    console.log(err);
+    console.log("Connection failed");
   });
 
 
@@ -93,7 +93,10 @@ app.post('/api/users/usermod', (req, res, next) => {
 })
 
 // CREATE WALLET
-app.post('/api/wallets/create', wallet.create)
+app.post('/api/wallets/create', checkAuth, wallet.create)
+
+// GET WALLETS
+app.get('/api/wallets',checkAuth, wallet.wallets)
 
 module.exports = app
 
