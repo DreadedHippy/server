@@ -13,4 +13,3 @@ const walletSchema = mongoose.Schema({
 walletSchema.plugin(uniqueValidator);
 
 module.exports = mongoose.model("Wallet", walletSchema);
-  

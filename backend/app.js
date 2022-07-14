@@ -15,6 +15,7 @@ const signup = require('./routes/signup')
 const login = require('./routes/login')
 const passwordreset = require('./routes/passwordreset');
 const wallet = require('./routes/wallet');
+const transaction = require('./routes/transaction')
 // const multer = require('multer')
 // const io = require('socket.io')(http);
 // const { buildSchema } = require('graphql');
@@ -98,17 +99,10 @@ app.post('/api/wallets/create', checkAuth, wallet.create)
 // GET WALLETS
 app.get('/api/wallets',checkAuth, wallet.wallets)
 
-module.exports = app
+// MAKE TRANSACTION
+app.post('/api/transactions/create', transaction.create)
 
-// SET STORAGE
-// var storage = multer.diskStorage({
-//   destination: function (req, file, cb) {
-//     cb(null, 'uploads')
-//   },
-//   filename: function (req, file, cb) {
-//     cb(null, file.fieldname + '-' + Date.now())
-//   }
-// })
+module.exports = app
 
 
 
