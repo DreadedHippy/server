@@ -100,7 +100,10 @@ app.post('/api/wallets/create', checkAuth, wallet.create)
 app.get('/api/wallets',checkAuth, wallet.wallets)
 
 // MAKE TRANSACTION
-app.post('/api/transactions/create', transaction.create)
+app.post('/api/transactions/create', checkAuth, transaction.create)
+
+//GET TRANSACTIONS
+app.get('/api/transactions',checkAuth, transaction.transactions)
 
 module.exports = app
 

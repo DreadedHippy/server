@@ -3,6 +3,8 @@ const uniqueValidator = require("mongoose-unique-validator");
 
 const transactionSchema = mongoose.Schema({
     fromId: {type: String, required: true},
+    fromEmail: {type: String, required: true},
+    fromName: {type: String, required: true},
     fromAddress: { type: String, required: true},
     toAddress: { type: String, required: true},
     amount: { type: String, required: true},
