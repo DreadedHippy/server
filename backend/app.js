@@ -187,7 +187,7 @@ app.post("/api/upload", checkAuth, (req, res) => {
       }).catch(err => {
         console.log('Error', err)
       })
-    })
+    });
   });
 });
 
