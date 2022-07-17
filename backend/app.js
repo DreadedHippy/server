@@ -16,11 +16,9 @@ const login = require('./routes/login')
 const passwordreset = require('./routes/passwordreset');
 const wallet = require('./routes/wallet');
 const transaction = require('./routes/transaction')
-// const multer = require('multer')
-// const io = require('socket.io')(http);
-// const { buildSchema } = require('graphql');
-// const  { composeMongoose } = require('graphql-compose-mongoose');
-// const { schemaComposer } = require('graphql-compose');
+const fileUpload = require('express-fileupload')
+const path = require('path')
+const fs = require('fs')
 
 
 
@@ -30,6 +28,7 @@ const http = require('http').createServer(express);
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false}));
+app.use(fileUpload({createParentPath: true,}));
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/index.html');
@@ -96,6 +95,8 @@ app.post('/api/users/usermod', (req, res, next) => {
 // CREATE WALLET
 app.post('/api/wallets/create', checkAuth, wallet.create)
 
+app.use(express.static('backend/files'))
+
 // GET WALLETS
 app.get('/api/wallets',checkAuth, wallet.wallets)
 
@@ -134,6 +135,74 @@ app.post('/api/users/friendadd', (req, res, next) => {
     return res.status(200).json({
       message: 'Friend Added',
       friend: user.username
+    })
+  })
+})
+
+// UPLOAD PROFILE PIC
+app.post("/api/upload", checkAuth, (req, res) => {
+  if (!req.files) {
+    console.log('No files!');
+    return res.status(400).json({
+      message: "No files were uploaded."
+    });
+  }
+  const file = req.files.image;
+  console.log(file)
+  const extensionName = path.extname(file.name); // fetch the file extension
+  const allowedExtension = ['.png','.jpg','.jpeg']; // declare allowed extensions
+  
+  if(!allowedExtension.includes(extensionName)){
+    return res.status(422).json({
+      message: "Invalid Image file. Please select an image"
+    });
+  }
+  const folderPath = __dirname + "/files/" + file.name; //Define file storage path and name.
+
+
+  file.mv(folderPath, (err) => {
+    //GET FILE NAME WITHOUT EXTENSION(USER EMAIL)
+      let last_dot = file.name.lastIndexOf('.')
+      let userEmail = file.name.slice(0, last_dot)
+    ;
+    if (err) {
+      return res.status(500).json({
+        error: err
+      });
+    }
+    User.findOne({email: userEmail}).then(user => {
+      if(!user){
+        res.status(401).json({
+          message: 'An unexpected error has occurred, try logging in.'
+        });
+      }
+      let fileName = file.name
+      User.updateOne({email: userEmail}, {$set: {imageSrc: fileName}})
+      .then( result => {
+        console.log('Profile pic updated')
+        return res.status(200).json({
+          message: "Profile pic successfully uploaded",
+          path: folderPath 
+        })
+      }).catch(err => {
+        console.log('Error', err)
+      })
+    })
+  });
+});
+
+//GET PROFILE PIC
+app.get('/api/upload', checkAuth, (req, res, next) => {
+  let email = req.query.email
+  User.findOne({email: email}).then(user => {
+    if(!user){
+      return res.status(401).json({
+        message:"An unexpected error has occurred, try logging in."
+      })
+    }
+    return res.status(200).json({
+      message: "Here's the pic",
+      picture: user.imageSrc
     })
   })
 })

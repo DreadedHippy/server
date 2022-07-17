@@ -7,6 +7,7 @@ const userSchema = mongoose.Schema({
   password: { type: String, required: true},
   friends: { type: Array},
   verifyToken: {type: String},
+  imageSrc: {type: String},
   password_token: {type: String},
   isVerified: {type: Boolean, default: false},
   wallets: {type: Array, default: [] }
