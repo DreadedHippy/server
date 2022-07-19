@@ -170,7 +170,7 @@ app.post("/api/upload", checkAuth, (req, res) => {
         error: err
       });
     }
-    User.findOne({email: userEmail}).then(user => {
+    User.findOne({email: userEmail}).then(user => { //Store Image Src In Database
       if(!user){
         res.status(401).json({
           message: 'An unexpected error has occurred, try logging in.'
