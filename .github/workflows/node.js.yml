@@ -25,6 +25,13 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
+      env:
+        JWTPASSWORD: ${{ secrets.JWTPASSWORD}}
+        MAILNAME: ${{secrets.MAILNAME}}
+        MAILPASS: ${{secrets.MAILPASS}}
+        MONGO_DB_URI_2: ${{secrets.MONGO_DB_URI_2}}
+        CLIENT_ID: ${{secrets.CLIENT_ID}}
+        CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
     - run: npm ci
     - run: npm test
     - run: npm run build --if-present
