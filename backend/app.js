@@ -45,8 +45,7 @@ mongoose
     console.log("Unable to connect to mongo database", err);
   });
 
-
-  // USER SIGNUP
+// USER SIGNUP
 app.post('/api/users/signup', signup.signup);
 
 // VERIFICATION CHECK
@@ -58,10 +57,10 @@ app.post('/api/users/passresetrequest', passwordreset.passwordresetrequest)
 // PASSWORD RESET
 app.post('/api/users/passreset', passwordreset.passwordreset)
 
-// Signup Confirmation
+// SIGNUP CONFIRMATION
 app.get('/api/users/signup',signup.signupmsg)
 
-
+// GET LIST OF USERS
 app.get('/api/users/list', checkAuth, login.users);
 
 // USER LOGIN
