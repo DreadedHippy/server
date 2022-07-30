@@ -105,6 +105,9 @@ app.post('/api/transactions/create', checkAuth, transaction.create)
 //GET TRANSACTIONS
 app.get('/api/transactions',checkAuth, transaction.transactions)
 
+//GET DEPOSITS
+app.get('/api/transactions/deposits', checkAuth, transaction.deposits)
+
 module.exports = app
 
 
