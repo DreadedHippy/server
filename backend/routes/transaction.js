@@ -6,8 +6,8 @@ exports.create = function (req, res, next) {
     fromId: req.body.fromId,
     fromEmail: req.body.email,
     fromName: req.body.fromName,
-    fromAddress: req.body.fromAddress,
-    toAddress: req.body.toAddress,
+    fromAddress: req.body.fromAddress.trim(),
+    toAddress: req.body.toAddress.trim(),
     amount: req.body.amount,
     currency: req.body.currency,
     date: req.body.date,
@@ -15,41 +15,51 @@ exports.create = function (req, res, next) {
     status: 'pending',
     remark: req.body.remark
   })
-  User.updateOne(
-    {email: req.body.email, 'wallets.address': transaction.fromAddress},
-    {$inc: {"wallets.$.balance": -transaction.amount}}
-  ).then(result => {
-    transaction
-      .save()
-      .then(result => {
-        res.status(200).json({
-          message: 'Transaction processed, awaiting approval...',
-          id: transaction._id,
-        })
-        console.log(result)
-      })
-      .catch(err => {
-        res.status(500).json({
-          message: 'An error occurred, please try again later',
-          error: err
-        });
-        console.log(err)
-      }).catch(err => {
-        console.log(err)
-      })
-  })
   User.findOne(
-    {$and : [{'wallets.address': transaction.toAddress}, {'wallets.currency': transaction.currency}]}
+    {wallets: { $elemMatch: {address: transaction.toAddress, currency: transaction.currency}}}
   ).then(user => {
+    // console.log(user, "\x1b[36m", 'User')
     if(!user){
-      return res.status(401).json({message: 'No user with such wallet'})
+      User.updateOne(
+        {email: req.body.email, 'wallets.address': transaction.fromAddress},
+        {$inc: {"wallets.$.balance": -transaction.amount}}
+      ).then(
+        res.status(200).json({
+          message: 'Transaction pending, waiting approval'
+        })        
+      )
+      return
     }
     User.updateOne(
-      {email: user.email, 'wallets.address': transaction.toAddress},
-      {$inc: {"wallets.$.balance": parseInt(transaction.amount)}}
-    ).then(result => {console.log('Result', result)})
+      {email: req.body.email, 'wallets.address': transaction.fromAddress},
+      {$inc: {"wallets.$.balance": -transaction.amount}}
+    ).then(result => {
+      User.updateOne(
+        {email: user.email, 'wallets.address': transaction.toAddress},
+        {$inc: {"wallets.$.balance": parseInt(transaction.amount)}}
+      ).then(result=> {console.log(result, ' <-- Result')})
+      transaction
+        .save()
+        .then(result => {
+          res.status(200).json({
+            message: 'Transaction processed, awaiting approval...',
+            id: transaction._id,
+          })
+        })
+        .catch(err => {
+          res.status(500).json({
+            message: 'An error occurred, please try again later',
+            error: err
+          });
+          console.log(err)
+        }).catch(err => {
+          console.log(err)
+      })
+    })
   }).catch(err => {
     console.log('Unable to fetch user with such wallet!', err)
+    res.status(500).json({message: 'No user with such wallet', err})
+    return
   })
 
 }
