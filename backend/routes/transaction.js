@@ -37,23 +37,21 @@ exports.create = function (req, res, next) {
       User.updateOne(
         {email: user.email, 'wallets.address': transaction.toAddress},
         {$inc: {"wallets.$.balance": parseInt(transaction.amount)}}
-      ).then(result=> {console.log(result, ' <-- Result')})
+      ).then(result=> {console.log(result, ' <-- Result')}).catch(err => {console.log(err, 'Error')})
       transaction
-        .save()
-        .then(result => {
-          res.status(200).json({
-            message: 'Transaction processed, awaiting approval...',
-            id: transaction._id,
-          })
+      .save()
+      .then(result => {
+        res.status(200).json({
+          message: 'Transaction processed, awaiting approval...',
+          id: transaction._id,
         })
-        .catch(err => {
-          res.status(500).json({
-            message: 'An error occurred, please try again later',
-            error: err
-          });
-          console.log(err)
-        }).catch(err => {
-          console.log(err)
+      })
+      .catch(err => {
+        res.status(500).json({
+          message: 'An error occurred, please try again later',
+          error: err
+        });
+        console.log(err)
       })
     })
   }).catch(err => {
