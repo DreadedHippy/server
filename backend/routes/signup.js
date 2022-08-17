@@ -29,6 +29,7 @@ exports.signup = function(req, res, next) {
       password: hash,
       friends: req.body.friends,
       verifyToken: verifyToken,
+      peerOffers: []
     });
     reg = true
     newman = true

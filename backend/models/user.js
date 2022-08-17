@@ -10,7 +10,8 @@ const userSchema = mongoose.Schema({
   imageSrc: {type: String},
   password_token: {type: String},
   isVerified: {type: Boolean, default: false},
-  wallets: {type: Array, default: [] }
+  wallets: {type: Array, default: [] },
+  peerOffers: {type: Array, default: []}
 });
 
 userSchema.plugin(uniqueValidator);
