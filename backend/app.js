@@ -112,6 +112,9 @@ app.get('/api/transactions/deposits', checkAuth, transaction.deposits)
 // MAKE P2P OFFER
 app.post('/api/peer/create', checkAuth, peer.create)
 
+//GET P2P OFFERS
+app.get('/api/peer/offers', checkAuth, peer.offers)
+
 module.exports = app
 
 

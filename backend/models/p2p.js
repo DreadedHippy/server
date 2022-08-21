@@ -12,7 +12,7 @@ const p2pSchema = mongoose.Schema({
   upperLimit: {type: Number, required: true}, //Maximum amount of crypto that can be bought at a time
   lowerLimit: {type: Number, required: true}, //Minimum amount of crypto that can be bought a time.
   paymentMethods: {type: Array, required: true},
-}, { timestamps: true });
+});
 
 p2pSchema.plugin(uniqueValidator);
 
