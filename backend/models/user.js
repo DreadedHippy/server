@@ -11,7 +11,8 @@ const userSchema = mongoose.Schema({
   password_token: {type: String},
   isVerified: {type: Boolean, default: false},
   wallets: {type: Array, default: [] },
-  peerOffers: {type: Array, default: []}
+  peerOffers: {type: Array, default: []},
+  paymentMethods: {type: Array, default: []}
 });
 
 userSchema.plugin(uniqueValidator);

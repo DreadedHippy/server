@@ -17,6 +17,7 @@ const passwordreset = require('./routes/passwordreset');
 const wallet = require('./routes/wallet');
 const transaction = require('./routes/transaction');
 const peer = require('./routes/p2p')
+const paymentMethod = require('./routes/paymentMethod')
 const fileUpload = require('express-fileupload')
 const path = require('path')
 const fs = require('fs')
@@ -114,6 +115,12 @@ app.post('/api/peer/create', checkAuth, peer.create)
 
 //GET P2P OFFERS
 app.get('/api/peer/offers', checkAuth, peer.offers)
+
+// ADD PAYMENT METHOD
+app.post('/api/paymentMethods/new', checkAuth, paymentMethod.add)
+
+// GET PAYMENT METHODS
+app.get('/api/paymentMethods', checkAuth, paymentMethod.methods)
 
 module.exports = app
 
