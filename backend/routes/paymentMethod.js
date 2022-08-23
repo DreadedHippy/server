@@ -9,7 +9,7 @@ exports.add = function(req, res, next){ //ADD PAYMENT METHOD
 		address: req.body.address,
 		bank: req.body.bank,
 		type: req.body.type
-	})
+	});
 	User.findOne({'email': email})
 	.then(user => {
 		console.log(user.paymentMethods);
@@ -39,7 +39,7 @@ exports.add = function(req, res, next){ //ADD PAYMENT METHOD
 }
 
 exports.methods = function(req, res, next){ //GET PAYMENT METHODS
-	const email = req.query.email;
+	const email = req.query.email
 	User.findOne({'email': email})
 	.then(user => {
 		res.status(200).json({
@@ -47,4 +47,23 @@ exports.methods = function(req, res, next){ //GET PAYMENT METHODS
 			methods: user.paymentMethods
 		})
 	})
+}
+
+exports.delete = function(req, res, next){ //DELETE PAYMENT METHOD
+	const email = req.body.email;
+	const methodID = req.body._id
+	console.log(methodID)
+	User.updateOne({'email': email, '.paymentMethods._id':methodID},
+		{$pull: {
+			paymentMethods: {
+				'type': req.body.type
+			}
+		}
+	})
+	.then(result => {
+		console.log(result)
+		res.status(200).json({
+			message: 'OK'
+		})
+	});
 }

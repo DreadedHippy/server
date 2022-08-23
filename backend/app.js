@@ -120,7 +120,10 @@ app.get('/api/peer/offers', checkAuth, peer.offers)
 app.post('/api/paymentMethods/new', checkAuth, paymentMethod.add)
 
 // GET PAYMENT METHODS
-app.get('/api/paymentMethods', checkAuth, paymentMethod.methods)
+app.get('/api/paymentMethods', checkAuth, paymentMethod.methods);
+
+// DELETE PAYMENT METHODS
+app.post('/api/paymentMethods/delete', checkAuth, paymentMethod.delete)
 
 module.exports = app
 

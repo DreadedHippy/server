@@ -41,7 +41,7 @@ exports.create = function(req, res, next) {
 
 }
 
-exports.wallets = function(req, res, next){
+exports.wallets = function(req, res, next){  // GET WALLETS
   const email = req.query.email
   User.findOne({email: email})
   .then(user => {
