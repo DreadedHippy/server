@@ -45,3 +45,7 @@ exports.offers = function(req, res, next){
     })
   })
 }
+
+exports.trade = function(req, res, next){
+  
+}

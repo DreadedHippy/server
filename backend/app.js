@@ -116,6 +116,9 @@ app.post('/api/peer/create', checkAuth, peer.create)
 //GET P2P OFFERS
 app.get('/api/peer/offers', checkAuth, peer.offers)
 
+//MAKE P2P TRADE
+app.post('/api/peer/trade', checkAuth, peer.trade);
+
 // ADD PAYMENT METHOD
 app.post('/api/paymentMethods/new', checkAuth, paymentMethod.add)
 
