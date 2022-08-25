@@ -7,6 +7,7 @@ exports.create = function(req, res, next){
   console.log(email)
   const peerOffer = new PeerOffer({
     name: req.body.name,
+    email: email,
     timeLimit: req.body.timeLimit,
     type: req.body.type,
     price: req.body.price,

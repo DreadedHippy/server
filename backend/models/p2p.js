@@ -3,6 +3,7 @@ const uniqueValidator = require("mongoose-unique-validator");
 
 const p2pSchema = mongoose.Schema({
   name: {type: String, required: true},
+  email: {type: String, required: true},
   timeLimit: {type: Number, required: true},
   type: {type: String, required: true},
   price: {type: Number, required: true},
