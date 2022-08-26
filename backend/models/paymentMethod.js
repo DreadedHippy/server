@@ -10,4 +10,4 @@ const paymentMethodSchema = mongoose.Schema({
 
 paymentMethodSchema.plugin(uniqueValidator);
 
-module.exports = mongoose.model("PaymentMethods", paymentMethodSchema);
+module.exports = mongoose.model("PaymentMethod", paymentMethodSchema);

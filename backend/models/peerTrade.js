@@ -15,4 +15,4 @@ const peerTradeSchema = mongoose.Schema({
 
 peerTradeSchema.plugin(uniqueValidator);
 
-module.exports = mongoose.model("Transaction", peerTradeSchema);
+module.exports = mongoose.model("PeerTrade", peerTradeSchema);

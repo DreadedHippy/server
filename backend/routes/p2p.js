@@ -1,4 +1,5 @@
 const PeerOffer = require ('../models/p2p');
+const PeerTrade = require('../models/peerTrade')
 const user = require('../models/user');
 const User = require('../models/user')
 
@@ -47,7 +48,27 @@ exports.offers = function(req, res, next){
 }
 
 exports.trade = function(req, res, next){
-  console.log(req.body)
+  let advertiserEmail = req.body.advertiser
+  let paymentMethodType = req.body.paymentMethod
+  const peerTrade = new PeerTrade({
+    advertType: req.body.advertType,
+    advertiser: req.body.advertiser,
+    customer: req.body.customer,
+    cryptoCurr: req.body.cryptoCurr,
+    cryptoAmt: req.body.cryptoAmt,
+    fiatCurr: req.body.fiatCurr,
+    fiatAmt: req.body.fiatAmt,
+    paymentMethod: req.body.paymentMethod,
+    status: req.body.status
+  })
+
+  User.findOne({'email': advertiserEmail, 'paymentMethods.type': paymentMethodType}, {_id: 0, 'paymentMethods.$': 1})
+  .then(result => {
+    console.log(result)
+  }).catch(err => {
+    console.log(err)
+  })
+
   res.status(200).json({
     Message: 'OK'
   })
