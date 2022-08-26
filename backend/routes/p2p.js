@@ -47,5 +47,8 @@ exports.offers = function(req, res, next){
 }
 
 exports.trade = function(req, res, next){
-  
+  console.log(req.body)
+  res.status(200).json({
+    Message: 'OK'
+  })
 }
