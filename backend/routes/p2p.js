@@ -65,11 +65,16 @@ exports.trade = function(req, res, next){
   User.findOne({'email': advertiserEmail, 'paymentMethods.type': paymentMethodType}, {_id: 0, 'paymentMethods.$': 1})
   .then(result => {
     console.log(result)
+    res.status(200).json({
+      message: 'OK',
+      paymentInfo: result.paymentMethods[0]
+    })
   }).catch(err => {
-    console.log(err)
+    console.log(err),
+    res.status(404).json({
+      message: 'Error',
+      result: err
+    })
   })
 
-  res.status(200).json({
-    Message: 'OK'
-  })
 }
