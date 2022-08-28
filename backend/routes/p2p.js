@@ -1,5 +1,5 @@
 const PeerOffer = require ('../models/p2p');
-const PeerTrade = require('../models/peerTrade')
+const peerTrade = require('../models/peerTrade');
 const user = require('../models/user');
 const User = require('../models/user')
 
@@ -61,14 +61,24 @@ exports.trade = function(req, res, next){
     paymentMethod: req.body.paymentMethod,
     status: req.body.status
   })
-
   User.findOne({'email': advertiserEmail, 'paymentMethods.type': paymentMethodType}, {_id: 0, 'paymentMethods.$': 1})
   .then(result => {
     console.log(result)
-    res.status(200).json({
-      message: 'OK',
-      paymentInfo: result.paymentMethods[0]
-    })
+    if(!result){
+      res.status(200).json({
+        message: 'No such payment method found',
+        paymentInfo: result.paymentMethods[0]
+      })
+      return
+    }
+    peerTrade.save().then(peerResult => {
+      console.log('Peer Trade Result',peerResult)
+      res.status(200).json({
+        message: 'OK',
+        paymentInfo: result.paymentMethods[0],
+        peerTradeID: peerResult._id
+      })
+    });
   }).catch(err => {
     console.log(err),
     res.status(404).json({
@@ -76,5 +86,17 @@ exports.trade = function(req, res, next){
       result: err
     })
   })
+}
 
+exports.customerConfirm = function(req, res, next) {
+  console.log(req.params.id);
+  let id = req.params.id
+  peerTrade.updateOne(
+    {_id:id}, {$set: {'status': 'pending-advertiser'}}
+  ).then(result => {
+    console.log(result)
+    res.status(200).json({
+      message:'OK'
+    })
+  })
 }

@@ -128,6 +128,9 @@ app.get('/api/paymentMethods', checkAuth, paymentMethod.methods);
 // DELETE PAYMENT METHODS
 app.post('/api/paymentMethods/delete', checkAuth, paymentMethod.delete)
 
+// CUSTOMER CONFIRM ORDER
+app.patch('/api/peer/:id', checkAuth, peer.customerConfirm)
+
 module.exports = app
 
 
