@@ -131,6 +131,9 @@ app.post('/api/paymentMethods/delete', checkAuth, paymentMethod.delete)
 // CUSTOMER CONFIRM ORDER
 app.patch('/api/peer/:id', checkAuth, peer.customerConfirm)
 
+// GET PENDING OFFERS
+app.get('/api/peer/pending', checkAuth, peer.pending)
+
 module.exports = app
 
 

@@ -100,3 +100,24 @@ exports.customerConfirm = function(req, res, next) {
     })
   })
 }
+
+exports.pending = function(req, res, next) {
+  const email = req.query.user;
+  console.log(email)
+  peerTrade.find({$and: [
+    {$or: [
+      {'advertiser': email},
+      {'customer': email}
+    ]},
+    {$or: [
+      {'status': 'pending'},
+      {'status': 'pending-advertiser'}
+    ]}
+  ]}).then(result => {
+    res.status(200).json({
+      message: 'OK',
+      result: result
+    })
+  })
+
+}

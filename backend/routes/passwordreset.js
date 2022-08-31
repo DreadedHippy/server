@@ -80,7 +80,8 @@ exports.passwordreset = async function (req, res, next) {
   const user = await User.findOne({password_token: key})
   if(!user){
     return res.status(500).json({
-      message: 'The user did not request a password change'});
+      message: 'The user did not request a password change'
+    });
   }
   bcrypt.hash(req.body.pass, 10).then(async hash => {
     const upd = await User.findByIdAndUpdate(
