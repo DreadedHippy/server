@@ -116,9 +116,6 @@ app.post('/api/peer/create', checkAuth, peer.create)
 //GET P2P OFFERS
 app.get('/api/peer/offers', checkAuth, peer.offers)
 
-//MAKE P2P TRADE
-app.post('/api/peer/trade', checkAuth, peer.trade);
-
 // ADD PAYMENT METHOD
 app.post('/api/paymentMethods/new', checkAuth, paymentMethod.add)
 
@@ -128,8 +125,14 @@ app.get('/api/paymentMethods', checkAuth, paymentMethod.methods);
 // DELETE PAYMENT METHODS
 app.post('/api/paymentMethods/delete', checkAuth, paymentMethod.delete)
 
-// CUSTOMER CONFIRM ORDER
-app.patch('/api/peer/:id', checkAuth, peer.customerConfirm)
+//MAKE P2P TRADE
+app.post('/api/peer/trade', checkAuth, peer.trade);
+
+// CUSTOMER CONFIRM P2P TRADE
+app.patch('/api/peer/confirm/:id', checkAuth, peer.customerConfirm)
+
+// CUSTOMER CANCEL  P2P TRADE
+app.patch('/api/peer/cancel/:id', checkAuth, peer.customerCancel)
 
 // GET PENDING OFFERS
 app.get('/api/peer/pending', checkAuth, peer.pending)
