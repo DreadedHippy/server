@@ -88,7 +88,7 @@ exports.trade = function(req, res, next){
         })
         return
       }
-      if(offer.inStock > peerTrade.cryptoAmt){ //if sufficient stock, update amount in stock
+      if(offer.inStock > peerTrade.cryptoAmt){ //If sufficient stock, update amount in stock
         offer.inStock -= peerTrade.cryptoAmt
         peerTrade.save().then(peerResult => { //Save the trade
           console.log('Peer Trade Result',peerResult)
@@ -114,12 +114,20 @@ exports.trade = function(req, res, next){
 exports.customerConfirm = function(req, res, next) {
   console.log(req.params.id);
   let id = req.params.id
-  PeerTrade.updateOne(
-    {_id:id}, {$set: {'status': 'pending-advertiser'}}
-  ).then(result => {
-    console.log(result)
-    res.status(200).json({
-      message:'Customer confirmed trade'
+  PeerTrade.findOne({_id: id}).then( trade => {
+    if(trade.status == 'cancelled'){ //Check if trade is already cancelled
+      res.status(200).json({
+        message:'Trade already cancelled'
+      })
+      return
+    }
+    PeerTrade.updateOne(
+      {_id:id}, {$set: {'status': 'pending-advertiser'}}
+    ).then(result => {
+      console.log(result)
+      res.status(200).json({
+        message:'Customer confirmed trade'
+      })
     })
   })
 }
@@ -127,12 +135,20 @@ exports.customerConfirm = function(req, res, next) {
 exports.customerCancel = function(req, res, next) {
   console.log(req.params.id);
   let id = req.params.id
-  PeerTrade.updateOne(
-    {_id:id}, {$set: {'status': 'cancelled'}}
-  ).then(result => {
-    console.log(result)
-    res.status(200).json({
-      message:'Customer cancelled trade'
+  PeerTrade.findOne({_id: id}).then( trade => {
+    if(trade.status == 'cancelled'){ //Check if trade is already cancelled
+      res.status(200).json({
+        message:'Trade already cancelled'
+      })
+      return
+    }
+    PeerTrade.updateOne(
+      {_id:id}, {$set: {'status': 'cancelled'}}
+    ).then(result => {
+      console.log(result)
+      res.status(200).json({
+        message:'Customer cancelled trade'
+      })
     })
   })
 }
