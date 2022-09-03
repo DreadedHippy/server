@@ -66,12 +66,11 @@ exports.trade = function(req, res, next){
   User.findOne( //Check for the payment method specified
     {'email': advertiserEmail, 'paymentMethods.type': paymentMethodType},
     {_id: 0, 'paymentMethods.$': 1}
-  ).then(result => {
-    console.log(result)
-    if(!result){
+  ).then(paymentMethodFound => {
+    if(!paymentMethodFound){
       res.status(200).json({
         message: 'No such payment method found',
-        paymentInfo: result.paymentMethods[0]
+        paymentInfo: paymentMethodFound.paymentMethods[0]
       })
       return
     }
@@ -80,8 +79,9 @@ exports.trade = function(req, res, next){
       {'email': advertiserEmail, 'peerOffers._id': offerID},
       {_id: 0, 'peerOffers.$': 1}
     )
-    .then( offer => {
-      console.log(offer)
+    .then(peerOffer => {
+      const offer = peerOffer.peerOffers[0] //Using offer[0] because it returns an array
+      console.log('Peer', offer)
       if(offer.inStock < peerTrade.cryptoAmt){
         res.status(200).json({
           message: 'Insufficient amount in stock'
@@ -94,7 +94,7 @@ exports.trade = function(req, res, next){
           console.log('Peer Trade Result',peerResult)
           res.status(200).json({
             message: 'OK',
-            paymentInfo: result.paymentMethods[0],
+            paymentInfo: paymentMethodFound.paymentMethods[0],
             peerTradeID: peerResult._id
           })
         });
