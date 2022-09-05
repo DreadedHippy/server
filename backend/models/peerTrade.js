@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const uniqueValidator = require("mongoose-unique-validator");
 
 const peerTradeSchema = mongoose.Schema({
+    offerID: {type: String, required: true}, //ID of the offer selected
     advertType: {type: String, required: true}, //Type of advertisement
     advertiser: {type: String, required: true}, //email of advertiser
     customer: {type: String, required: true}, //email of customer

@@ -53,6 +53,7 @@ exports.trade = function(req, res, next){
   let advertiserEmail = req.body.advertiser
   let paymentMethodType = req.body.paymentMethod
   const peerTrade = new PeerTrade({
+    offerID: req.body.offerID,
     advertType: req.body.advertType,
     advertiser: req.body.advertiser,
     customer: req.body.customer,
@@ -155,7 +156,6 @@ exports.customerCancel = function(req, res, next) {
 
 exports.pending = function(req, res, next) {
   const email = req.query.user;
-  console.log(email)
   PeerTrade.find({$and: [
     {$or: [
       {'advertiser': email},
