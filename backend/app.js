@@ -129,7 +129,11 @@ app.post('/api/paymentMethods/delete', checkAuth, paymentMethod.delete)
 app.post('/api/peer/trade', checkAuth, peer.trade);
 
 // CUSTOMER CONFIRM P2P TRADE
-app.patch('/api/peer/confirm/:id', checkAuth, peer.customerConfirm)
+app.patch('/api/peer/customerConfirm/:id', checkAuth, peer.customerConfirm)
+
+
+// ADVERTISER CONFIRM P2P TRADE
+app.patch('/api/peer/advertiserConfirm/:id', checkAuth, peer.advertiserConfirm)
 
 // CUSTOMER CANCEL  P2P TRADE
 app.patch('/api/peer/cancel/:id', checkAuth, peer.customerCancel)

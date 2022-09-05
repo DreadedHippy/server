@@ -172,3 +172,45 @@ exports.pending = function(req, res, next) {
     })
   })
 }
+
+exports.advertiserConfirm = function(req, res, next){
+  let id = req.params.id
+  PeerTrade.findOne({_id: id})
+  .then( trade => {
+    let offerID = ObjectId(trade.offerID)
+    if(!trade){
+      res.status(404).json({
+        message: 'Trade Not Found'
+      })
+      return
+    }
+    if(trade.advertType == 'sell'){
+      User.updateOne(
+        {'email': trade.advertiser, 'peerOffers._id': offerID},
+        {$inc: {'peerOffers.$.inStock' : -trade.cryptoAmt}}
+      ).then( response => {
+        PeerTrade.updateOne(
+          {_id:id}, {$set: {'status': 'completed'}}
+        ).then(
+          res.status(200).json({
+            message: 'Trade Confirmed'
+          })
+        )
+      }).catch(err => {
+        console.log(err);
+        res.status(500).json({
+          message: err
+        })
+      })
+    }
+    //TODO: add a trade completion system for p2p buy orders
+    if(trade.type == 'buy'){
+      res.status(200).json({
+        message: 'Not yet implemented'
+      })
+    }
+  })
+  .catch( err => {
+    console.log(err)
+  })
+}
