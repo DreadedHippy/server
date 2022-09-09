@@ -131,7 +131,6 @@ app.post('/api/peer/trade', checkAuth, peer.trade);
 // CUSTOMER CONFIRM P2P TRADE
 app.patch('/api/peer/customerConfirm/:id', checkAuth, peer.customerConfirm)
 
-
 // ADVERTISER CONFIRM P2P TRADE
 app.patch('/api/peer/advertiserConfirm/:id', checkAuth, peer.advertiserConfirm)
 
