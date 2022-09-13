@@ -48,7 +48,7 @@ exports.offers = function(req, res, next){
   })
 }
 
-exports.trade = function(req, res, next){
+exports.trade = function(req, res, next){  //Create Trade
   let offerID = new ObjectId(req.body.offerID)
   let advertiserEmail = req.body.advertiser
   let paymentMethodType = req.body.paymentMethod
@@ -113,21 +113,48 @@ exports.trade = function(req, res, next){
 }
 
 exports.customerConfirm = function(req, res, next) {
-  console.log(req.params.id);
   let id = req.params.id
   PeerTrade.findOne({_id: id}).then( trade => {
-    if(trade.status == 'cancelled'){ //Check if trade is already cancelled
-      res.status(200).json({
-        message:'Trade already cancelled'
-      })
-      return
-    }
-    PeerTrade.updateOne(
-      {_id:id}, {$set: {'status': 'pending-advertiser'}}
-    ).then(result => {
-      console.log(result)
-      res.status(200).json({
-        message:'Customer confirmed trade'
+    let offerID = ObjectId(trade.offerID)
+    User.findOne(
+      {'email': trade.advertiser, 'peerOffers._id': offerID},
+      {_id: 0, 'peerOffers.$': 1}
+    ).then(peerOffer => {
+      if(!peerOffer){
+        res.status(400).json({
+          message: 'Offer Not Found'
+        })
+      }
+      if(trade.status == 'cancelled'){ //Check if trade is already cancelled
+        res.status(200).json({
+          message:'Trade already cancelled'
+        })
+        return
+      }
+      let timeLimit = peerOffer.peerOffers[0]
+      if(new Date() - trade.createdAt  <= timeLimit*60*1000 ){ //Check if trade is expired
+        PeerTrade.findOneAndUpdate(
+          {_id:id},
+          {$set: {'status':'expired'}}
+        ).then(
+          res.status(200).json({
+            message: 'Trade Expired!'
+          })
+        )
+      }
+
+      PeerTrade.findOneAndUpdate(
+        {_id:id},
+        {$set: {'status':'pending-advertiser'}}
+      ).then(
+        result => {
+          console.log(result, '\n Here it is')
+          res.status(200).json({
+            message:'Customer confirmed trade'
+          })
+        }
+      ).catch(err => {
+        console.log(err)
       })
     })
   })
