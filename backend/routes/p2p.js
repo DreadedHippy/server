@@ -151,7 +151,7 @@ exports.customerConfirm = function(req, res, next) {
           console.log(result, '\n Here it is')
           res.status(200).json({
             message:'Customer confirmed trade'
-          })
+          });
         }
       ).catch(err => {
         console.log(err)
