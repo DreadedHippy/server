@@ -64,52 +64,84 @@ exports.trade = function(req, res, next){  //Create Trade
     paymentMethod: req.body.paymentMethod,
     status: req.body.status
   })
-  User.findOne( //Check for the payment method specified
-    {'email': advertiserEmail, 'paymentMethods.type': paymentMethodType},
-    {_id: 0, 'paymentMethods.$': 1}
-  ).then(paymentMethodFound => {
-    if(!paymentMethodFound){
-      res.status(200).json({
-        message: 'No such payment method found',
-        paymentInfo: paymentMethodFound.paymentMethods[0]
-      })
-      return
-    }
-    
+
+  if(peerTrade.advertType == 'buy'){
     User.findOne( //Find The Offer that the user wants to make a trade on
       {'email': advertiserEmail, 'peerOffers._id': offerID},
       {_id: 0, 'peerOffers.$': 1}
-    )
-    .then(peerOffer => {
-      const offer = peerOffer.peerOffers[0] //Using offer[0] because it returns an array
-      console.log('Peer', offer)
-      if(offer.inStock < peerTrade.cryptoAmt){
+    ).then(peerOffer => {
+      offer = peerOffer.peerOffers[0];
+
+      if(offer.inStock < peerTrade.fiatAmt){ //Insufficient amount in stock
         res.status(200).json({
           message: 'Insufficient amount in stock'
         })
         return
       }
-      if(offer.inStock > peerTrade.cryptoAmt){ //If sufficient stock, update amount in stock
-        offer.inStock -= peerTrade.cryptoAmt
-        peerTrade.save().then(peerResult => { //Save the trade
-          console.log('Peer Trade Result',peerResult)
+
+      if(offer.inStock > peerTrade.fiatAmt){ //Sufficient amount in stock
+        User.updateOne(
+          {'email': advertiserEmail, 'peerOffers._id': offerID},
+          {$inc: {'peerOffers.$.inStock' : -peerTrade.fiatAmt}}
+        ).then( () => {
           res.status(200).json({
-            message: 'OK',
-            paymentInfo: paymentMethodFound.paymentMethods[0],
-            peerTradeID: peerResult._id
+            message: 'Trade Successful'
           })
-        });
+          return
+
+        })
       }
-    }).catch( err => {
-      console.log('An error occurred', err)
     })
-  }).catch(err => {
-    console.log(err),
-    res.status(404).json({
-      message: 'Payment Not found',
-      result: err
+  }
+
+  if (peerTrade.advertType == 'sell'){
+    User.findOne( //Check for the payment method specified
+    {'email': advertiserEmail, 'paymentMethods.type': paymentMethodType},
+    {_id: 0, 'paymentMethods.$': 1}
+    ).then(paymentMethodFound => {
+      if(!paymentMethodFound){
+        res.status(200).json({
+          message: 'No such payment method found',
+          paymentInfo: paymentMethodFound.paymentMethods[0]
+        })
+        return
+      }
+
+      User.findOne( //Find The Offer that the user wants to make a trade on
+        {'email': advertiserEmail, 'peerOffers._id': offerID},
+        {_id: 0, 'peerOffers.$': 1}
+      )
+      .then(peerOffer => {
+        const offer = peerOffer.peerOffers[0] //Using offer[0] because it returns an array
+        console.log('Peer', offer)
+        if(offer.inStock < peerTrade.cryptoAmt){
+          res.status(200).json({
+            message: 'Insufficient amount in stock'
+          })
+          return
+        }
+        if(offer.inStock > peerTrade.cryptoAmt){ //If sufficient stock, update amount in stock
+          offer.inStock -= peerTrade.cryptoAmt
+          peerTrade.save().then(peerResult => { //Save the trade
+            console.log('Peer Trade Result',peerResult)
+            res.status(200).json({
+              message: 'OK',
+              paymentInfo: paymentMethodFound.paymentMethods[0],
+              peerTradeID: peerResult._id
+            })
+          });
+        }
+      }).catch( err => {
+        console.log('An error occurred', err)
+      })
+    }).catch(err => {
+      console.log(err),
+      res.status(404).json({
+        message: 'Payment Not found',
+        result: err
+      })
     })
-  })
+  }
 }
 
 exports.customerConfirm = function(req, res, next) {
@@ -150,7 +182,7 @@ exports.customerConfirm = function(req, res, next) {
         result => {
           console.log(result, '\n Here it is')
           res.status(200).json({
-            message:'Customer confirmed trade'
+            message:'Trade confirmed'
           });
         }
       ).catch(err => {
