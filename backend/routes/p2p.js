@@ -65,7 +65,7 @@ exports.trade = function(req, res, next){  //Create Trade
     status: req.body.status
   })
 
-  if(peerTrade.advertType == 'buy'){
+  if(peerTrade.advertType == 'buy'){ //Advertiser wishes to buy crypto
     User.findOne( //Find The Offer that the user wants to make a trade on
       {'email': advertiserEmail, 'peerOffers._id': offerID},
       {_id: 0, 'peerOffers.$': 1}
@@ -79,22 +79,25 @@ exports.trade = function(req, res, next){  //Create Trade
         return
       }
 
-      if(offer.inStock > peerTrade.fiatAmt){ //Sufficient amount in stock
-        User.updateOne(
-          {'email': advertiserEmail, 'peerOffers._id': offerID},
-          {$inc: {'peerOffers.$.inStock' : -peerTrade.fiatAmt}}
-        ).then( () => {
+      if(offer.inStock >= peerTrade.fiatAmt){ //Sufficient amount in stock
+        User.findOne({
+          'email': advertiserEmail,
+          'peerOffers._id': offerID
+        }).then( result => {
+          console.log(result)
+          peerTrade.status = 'pending-advertiser'
+          peerTrade.save()
           res.status(200).json({
             message: 'Trade Successful'
           })
           return
-
+          
         })
       }
     })
   }
 
-  if (peerTrade.advertType == 'sell'){
+  if (peerTrade.advertType == 'sell'){  //Advertiser wishes to sell crypto
     User.findOne( //Check for the payment method specified
     {'email': advertiserEmail, 'paymentMethods.type': paymentMethodType},
     {_id: 0, 'paymentMethods.$': 1}
@@ -261,12 +264,21 @@ exports.advertiserConfirm = function(req, res, next){
           message: err
         })
       })
+      return
     }
-    //TODO: add a trade completion system for p2p buy orders
-    if(trade.type == 'buy'){
-      res.status(200).json({
-        message: 'Not yet implemented'
+
+    if(trade.advertType == 'buy'){      
+      User.updateOne(
+        {'email': trade.advertiser, 'peerOffers._id': offerID},
+        {$inc: {'peerOffers.$.inStock' : -trade.fiatAmt}}
+      ).then(() => {
+        res.status(200).json({
+          message: 'Trade Successful'
+        })
+      }).catch( err => {
+        console.log(err)
       })
+      return
     }
   })
   .catch( err => {
