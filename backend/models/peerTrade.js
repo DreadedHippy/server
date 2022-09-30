@@ -11,7 +11,8 @@ const peerTradeSchema = mongoose.Schema({
     fiatCurr: {type: String, required: true}, // fiat currency to be traded
     fiatAmt: { type: Number, required: true}, //amount of fiat currency
     paymentMethod: { type: String, required: true}, //method of payment selected by customer
-    status: { type: String, required: true} //current status of the order
+    status: { type: String, required: true}, //current status of the order
+    timeLimit: {type: Number, required: true}
 }, { timestamps: true });
 
 peerTradeSchema.plugin(uniqueValidator);

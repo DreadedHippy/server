@@ -62,7 +62,8 @@ exports.trade = function(req, res, next){  //Create Trade
     fiatCurr: req.body.fiatCurr,
     fiatAmt: req.body.fiatAmt,
     paymentMethod: req.body.paymentMethod,
-    status: req.body.status
+    status: req.body.status,
+    timeLimit: req.body.timeLimit
   })
 
   if(peerTrade.advertType == 'buy'){ //Advertiser wishes to buy crypto
@@ -234,6 +235,26 @@ exports.pending = function(req, res, next) {
     })
   })
 }
+
+exports.updateExpired = function(req, res, next) {
+  let expiredOffers = req.body.offers
+  expiredOffers.map( offerID => {
+    PeerTrade.findOne({_id: offerID}).then(
+      trade => {
+        trade.status == 'expired'
+        trade.save().then(
+          result => {
+            console.log(result)
+            res.status(200).json({
+              message: 'OK'
+            })
+          }
+        )
+      }
+    )
+  })
+}
+
 
 exports.advertiserConfirm = function(req, res, next){
   let id = req.params.id
