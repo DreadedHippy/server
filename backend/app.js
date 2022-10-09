@@ -140,6 +140,8 @@ app.patch('/api/peer/cancel/:id', checkAuth, peer.customerCancel)
 // GET PENDING OFFERS
 app.get('/api/peer/pending', checkAuth, peer.pending)
 
+app.post('/api/transactions/funding', checkAuth, transaction.funding)
+
 module.exports = app
 
 

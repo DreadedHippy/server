@@ -1,5 +1,5 @@
 const { result } = require('lodash');
-const Wallet = require('../models/wallet')
+const Wallet = require('../models/wallet');
 const User = require('../models/user');
 const { response } = require('express');
 

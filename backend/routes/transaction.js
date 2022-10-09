@@ -1,5 +1,9 @@
+const { rest } = require('lodash')
 const Transaction = require('../models/transaction')
-const User = require('../models/user')
+const User = require('../models/user');
+const Wallet = require('../models/wallet');
+const Funding = require('../models/fundingWallet');
+
 
 exports.create = function (req, res, next) {
   const transaction  = new Transaction({
@@ -97,4 +101,90 @@ exports.deposits = function(req, res, next){
   }).catch(err => {
     console.log('err', err)
   })
+}
+
+exports.funding = function(req, res, next){
+  let transactionInfo = req.body.transaction; //TransactionInfo gotten from website
+  console.log(transactionInfo);
+
+  const email = req.body.email; //User Email
+  const currency = req.body.currency; //Currency of wallet
+  const amount = req.body.amount; //Amount transferred
+
+  const transaction  = new Transaction({
+    fromId: transactionInfo.fromId,
+    fromEmail: email,
+    fromName: transactionInfo.fromName.trim() + ' spot wallet',
+    fromAddress: transactionInfo.fromAddress.trim(),
+    toAddress: 'fundingWallet',
+    amount: amount,
+    currency: currency,
+    date: transactionInfo.date,
+    type: 'funding',
+    status: 'confirmed',
+    remark: transactionInfo.remark
+  })
+
+
+  User.findOne({
+    'email': email
+  }).then( user => {
+    let userWallets = user.wallets
+    function isWallet(wallet){ //Check if the funding wallet already exists
+      if(wallet.currency == currency && wallet.type == 'funding'){
+        return true
+      }
+      return false
+    }
+    let filteredWallet = userWallets.filter(isWallet)[0] //Get wallet if existing
+
+    console.log(filteredWallet)
+
+    if(filteredWallet){
+      User.updateOne(
+        {email: email, 'wallets.address': transaction.fromAddress},
+        {$inc: {"wallets.$.balance": -amount}}
+      ).then(
+        User.updateOne(
+          {email: email, 'wallets.type': 'funding', 'wallets.currency': currency},
+          {$inc: {"wallets.$.balance": amount}}
+        ).then(
+          res.status(200).json({
+            message: 'Funding received'
+          })
+        )
+      ).catch (err => {
+        res.status(201).json({
+          message: 'An Error Occured'
+        })
+      })
+      return
+    }
+    if(!filteredWallet){
+      const fundingWallet = new Funding({
+        name: currency.toUpperCase() + ' funding wallet',
+        currency: currency,
+        address: user.username+currency.toUpperCase()+'FundingWallet',
+        iconSrc: '',
+        balance: amount,
+        transactions: [transaction],
+        type: 'funding',
+      })
+      User.updateOne(
+        {email: email, 'wallets.address': {$ne: fundingWallet.address}},
+        {$push: {wallets: fundingWallet}}
+      ).then(
+        User.updateOne(
+          {email: email, 'wallets.address': transaction.fromAddress},
+          {$inc: {"wallets.$.balance": -amount}}
+        ).then(
+          res.status(200).json({
+            message: 'Funding wallet created and funding received'
+          })
+        )
+      )
+      console.log(fundingWallet);
+    }
+  })
+
 }
