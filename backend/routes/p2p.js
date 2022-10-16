@@ -260,7 +260,7 @@ exports.updateExpired = function(req, res, next) {
 exports.advertiserConfirm = function(req, res, next){
   let id = req.params.id
 
-  function creditUser(email, currency, amount){
+  function creditUser(email, currency, amount){ //Function to credit a user's funding wallet
     return new Promise(function(resolve, reject) {
       User.findOne({'email': email}).then( user => {
         const username = user.username;
