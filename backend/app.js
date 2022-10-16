@@ -134,13 +134,13 @@ app.patch('/api/peer/customerConfirm/:id', checkAuth, peer.customerConfirm)
 // ADVERTISER CONFIRM P2P TRADE
 app.patch('/api/peer/advertiserConfirm/:id', checkAuth, peer.advertiserConfirm)
 
-// CUSTOMER CANCEL  P2P TRADE
-app.patch('/api/peer/cancel/:id', checkAuth, peer.customerCancel)
+// CHECK FUNDING BAL
+app.post('/api/peer/checkFundingBal', checkAuth, peer.checkBal);
 
 // GET PENDING OFFERS
 app.get('/api/peer/pending', checkAuth, peer.pending)
 
-app.post('/api/transactions/funding', checkAuth, transaction.funding)
+app.post('/api/transactions/funding', checkAuth, transaction.funding);
 
 module.exports = app
 

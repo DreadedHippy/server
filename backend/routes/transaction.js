@@ -126,6 +126,8 @@ exports.funding = function(req, res, next){
   })
 
 
+
+  //Funding Wallet functions
   User.findOne({
     'email': email
   }).then( user => {
@@ -147,7 +149,7 @@ exports.funding = function(req, res, next){
       ).then(
         User.updateOne(
           {email: email, 'wallets.type': 'funding', 'wallets.currency': currency},
-          {$inc: {"wallets.$.balance": amount}}
+          {$inc: {"wallets.$.balance": amount}, $push: {"wallets.$.transactions": transaction}}
         ).then(
           res.status(200).json({
             message: 'Funding received'

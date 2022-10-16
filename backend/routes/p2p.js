@@ -3,6 +3,7 @@ const PeerTrade = require('../models/peerTrade');
 const user = require('../models/user');
 const User = require('../models/user');
 const ObjectId = require('mongodb').ObjectId
+const Funding = require('../models/fundingWallet');
 
 exports.create = function(req, res, next){
   let email = req.body.email
@@ -156,7 +157,7 @@ exports.customerConfirm = function(req, res, next) {
       {'email': trade.advertiser, 'peerOffers._id': offerID},
       {_id: 0, 'peerOffers.$': 1}
     ).then(peerOffer => {
-      if(!peerOffer){
+      if(!peerOffer){ //If offer does not exist
         res.status(400).json({
           message: 'Offer Not Found'
         })
@@ -258,8 +259,68 @@ exports.updateExpired = function(req, res, next) {
 
 exports.advertiserConfirm = function(req, res, next){
   let id = req.params.id
+
+  function creditUser(email, currency, amount){
+    return new Promise(function(resolve, reject) {
+      User.findOne({'email': email}).then( user => {
+        const username = user.username;
+        const walletAddress = username+currency.toUpperCase()+'FundingWallet'
+        const allUserWallets = user.wallets
+        const email = user.email
+
+        let foundWallet = allUserWallets.filter( wallet => {
+          return(wallet.address == walletAddress && wallet.type == 'funding')
+        })
+        foundWallet = foundWallet[0]
+
+        if(foundWallet){
+          User.updateOne({email: email, 'wallets': {$elemMatch: {
+            address: walletAddress, type: 'funding'
+          }}}, {$inc: {'wallets.$.balance': amount}}).then(
+            result => {
+              console.log(result)
+              resolve(true)
+            }
+          )
+        }
+
+        else if(!foundWallet){
+          const fundingWallet = new Funding({
+            name: currency.toUpperCase() + ' funding wallet',
+            currency: currency,
+            address: username+currency.toUpperCase()+'FundingWallet',
+            iconSrc: '',
+            balance: 0,
+            transactions: [],
+            type: 'funding',
+          })
+          User.updateOne(
+            {email: email, 'wallets.address': {$ne: fundingWallet.address}},
+            {$push: {wallets: fundingWallet}}
+          ).then( result => {
+            console.log(result)
+            User.updateOne({email: email, 'wallets': {$elemMatch: {
+              address: walletAddress, type: 'funding'
+            }}}, {$inc: {'wallets.$.balance': amount}}).then(
+              response => {
+                resolve(true)
+              }
+            )
+          }
+          )
+        }
+        else {
+          reject(false)
+        }
+      })        
+    })
+  }
+
+
   PeerTrade.findOne({_id: id})
-  .then( trade => {
+  .then(trade => {
+    const fiatCurrency = trade.fiatCurr;
+    const cryptoCurrency = trade.cryptoCurr;
     let offerID = ObjectId(trade.offerID)
     if(!trade){
       res.status(404).json({
@@ -272,13 +333,22 @@ exports.advertiserConfirm = function(req, res, next){
         {'email': trade.advertiser, 'peerOffers._id': offerID},
         {$inc: {'peerOffers.$.inStock' : -trade.cryptoAmt}}
       ).then( response => {
-        PeerTrade.updateOne(
-          {_id:id}, {$set: {'status': 'completed'}}
-        ).then(
+        creditUser(trade.customer, trade.cryptoCurr, trade.cryptoAmt).then( userCredited => {
+          console.log('Is user credited?', userCredited)
+          PeerTrade.updateOne(
+            {_id:id}, {$set: {'status': 'completed'}}
+          ).then(
+            res.status(200).json({
+              message: 'Trade Confirmed'
+            })
+          )
+        }).catch(err => {
+          console.log('An Error occurred:', err)
           res.status(200).json({
-            message: 'Trade Confirmed'
-          })
-        )
+            message: 'Could not credit user'
+          });
+          return 
+        })
       }).catch(err => {
         console.log(err);
         res.status(500).json({
@@ -305,4 +375,58 @@ exports.advertiserConfirm = function(req, res, next){
   .catch( err => {
     console.log(err)
   })
+}
+
+exports.checkBal = function(req, res, next){
+  console.log(req.body);
+  const email = req.body.email;
+  const fiatCurrency = req.body.currency;
+  const amount = req.body.amount
+  User.findOne({email: email}).then(
+    user => {
+      const walletsArray = user.wallets
+      const username = user.username;
+      const fundingWalletAddress = username+fiatCurrency.toUpperCase()+'FundingWallet'
+
+      const wallet = walletsArray.filter( wallet => {
+        return (wallet.address == fundingWalletAddress && wallet.type == 'funding')
+      })
+
+      const foundWallet = wallet[0]
+
+      if(foundWallet){  //If wallet was found
+        let walletID = ObjectId(foundWallet._id)
+        if(foundWallet.balance < amount){ //if wallet has sufficient amount
+          res.status(200).json({
+            message: 'Insufficient wallet balance',
+            isEligible: false
+          })
+          return
+        }
+        User.updateOne({'email': email, 'wallets._id': walletID},
+        {$inc: { "wallets.$.balance": -amount}}
+        ).then(
+          result => {
+            console.log(result);
+            console.log(foundWallet)
+            res.status(200).json({
+              message: 'Wallet Found and Updated',
+              isEligible: true
+            })
+            return
+          }
+        )
+      }
+      if(!foundWallet){
+        res.status(200).json({
+          message: 'Wallet not found',
+          isEligible: false
+        })
+        return
+      }
+      // res.status(200).json({
+      //   message: 'All Good',
+      // })
+    }
+  )
 }
