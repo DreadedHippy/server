@@ -100,14 +100,16 @@ exports.trade = function(req, res, next){  //Create Trade
   }
 
   if (peerTrade.advertType == 'sell'){  //Advertiser wishes to sell crypto
+    console.log(req.body)
     User.findOne( //Check for the payment method specified
     {'email': advertiserEmail, 'paymentMethods.type': paymentMethodType},
     {_id: 0, 'paymentMethods.$': 1}
     ).then(paymentMethodFound => {
+      console.log("\x1b[31m", "Payment Method:", paymentMethodFound, "PaymentMethod")
       if(!paymentMethodFound){
         res.status(200).json({
           message: 'No such payment method found',
-          paymentInfo: paymentMethodFound.paymentMethods[0]
+          paymentInfo: paymentMethodFound
         })
         return
       }
@@ -142,7 +144,7 @@ exports.trade = function(req, res, next){  //Create Trade
     }).catch(err => {
       console.log(err),
       res.status(404).json({
-        message: 'Payment Not found',
+        message: 'Payment Method not found',
         result: err
       })
     })
